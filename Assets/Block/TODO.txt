@@ -1,0 +1,5 @@
+TODO:
+- learn how to write shaders
+- optimize certain shaders for distance rendering.
+- optimize this shader.
+- 
