@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Basic
-  m_Shader: {fileID: 4800000, guid: 0d6e714a5557a6646b6d210e52ab4f8d, type: 3}
+  m_Name: Dirt
+  m_Shader: {fileID: 4800000, guid: b00e93ebd587e6b4a891caf09a4248ff, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -61,7 +61,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
@@ -74,5 +74,5 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.9339623, g: 0.5683072, b: 0.5683072, a: 1}
+    - _Color: {r: 0.5754717, g: 0.2587328, b: 0.16015486, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
