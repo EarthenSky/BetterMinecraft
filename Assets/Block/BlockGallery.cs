@@ -15,24 +15,11 @@ public class BlockGallery : MonoBehaviour
         for(int y = 0; y < Chunk.Y_SIZE; y++) {
             for(int x = 0; x < Chunk.X_SIZE; x++) {
                 for(int z = 0; z < Chunk.Z_SIZE; z++) {
-                    if (data[y, x, z] > Chunk.limit) 
+                    if (data[y, x, z] == 1) 
                         Graphics.DrawMesh(cube, chunkPos + new Vector3(x, y, z), Quaternion.identity, dirt, 0);
                 }
             }
         }
     }
 
-/*
-    public void DrawLayers(byte[,,] data, Vector3 chunkPos) 
-    {
-        for(int y = 0; y < Chunk.Y_SIZE; y++) {
-            for(int x = 0; x < Chunk.X_SIZE; x++) {
-                for(int z = 0; z < Chunk.Z_SIZE; z++) {
-                    if (data[y, x, z] > Chunk.limit) 
-                        Graphics.DrawMesh(cube, chunkPos + new Vector3(x, y, z), Quaternion.identity, dirt, 0);
-                }
-            }
-        }
-    }
-*/
 }

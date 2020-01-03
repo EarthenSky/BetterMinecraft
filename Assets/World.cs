@@ -26,10 +26,14 @@ public class World : MonoBehaviour
     {
         if(_worldExists) DestroyWorld();
 
-        // Create New Chunk
-        _chunk = new GameObject("Chunk");
-        Chunk chunk = _chunk.AddComponent<Chunk>();
-        chunk.InitChunk(Chunk.GOOD, gameObject, blocks);
+        // Create New Chunk (4x)
+        for(int x = 0; x < 4; x++) {
+            _chunk = new GameObject("Chunk");
+            Chunk chunk = _chunk.AddComponent<Chunk>();
+            chunk.InitChunk(Chunk.GOOD, gameObject, blocks);
+            chunk.transform.Translate(new Vector3(x*32, 0, 0));
+        }
+        
 
         _worldExists = true;
     }

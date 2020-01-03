@@ -112,7 +112,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1030884176
+--- !u!1 &1275810540
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -120,23 +120,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1030884177}
+  - component: {fileID: 1275810542}
+  - component: {fileID: 1275810541}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Block Gallery
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1030884177
+--- !u!114 &1275810541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1275810540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c5c8dc721b8b6a4c8c9a55ad05ed9b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  grass: {fileID: 2100000, guid: fb9f99346d0cf404a95d9c61a3f9001c, type: 2}
+  dirt: {fileID: 2100000, guid: 97e4b94b01f7a1c4c95a66b9b974baae, type: 2}
+--- !u!4 &1275810542
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1030884176}
+  m_GameObject: {fileID: 1275810540}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.016712, y: 36.88353, z: 40.151676}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -336,7 +352,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fba6f2a899d1b97428584edb2c052803, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cube: {fileID: 5029300847691579063, guid: bc024de525404f940b354a3cb00f14f1, type: 3}
   generateWorld: 1
 --- !u!4 &2027020947
 Transform:
