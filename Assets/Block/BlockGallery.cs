@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// For block catagorizing
+public enum Block : byte 
+{
+    Air = 0,
+    Dirt = 1,
+    Grass = 2,
+    Stone = 3
+}
+
 // Sort of like a factory but not.
 // acutally, not really. TODO: Change name to BlockManager
 public class BlockGallery : MonoBehaviour
@@ -10,6 +19,7 @@ public class BlockGallery : MonoBehaviour
     public Material grass;
     public Material dirt;
 
+    // DEPRECATED function
     public void Draw(byte[,,] data, Vector3 chunkPos) 
     {
         for(int y = 0; y < Chunk.Y_SIZE; y++) {
