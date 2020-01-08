@@ -44,9 +44,9 @@ public class Chunk : MonoBehaviour
 
     private BlockGallery _blocks;
 
-    private Vector3[] verts;
+    //private Vector3[,] verts;
     //private Vector2[] uvs;  // do i need uvs?
-    private int[] tris;
+    //private int[,] tris;
     
     public void InitChunk(byte quality, GameObject world, BlockGallery blocks) 
     {
@@ -60,11 +60,11 @@ public class Chunk : MonoBehaviour
         RandFillData();
         BakeData();
         
-        //LoadMeshLayers();
+        // LoadMeshLayers();  // old, slow, and inefficient.
         // Create this chunk's sub meshes.
         subChunks = new Mesh[SUB_CHUNKS];
         for(int i = 0; i < subChunks.Length; i++)
-            CreateMeshLayer(i);
+            RefreshMeshLayer(i);
     }
     
     // Use position and seed to get data.
@@ -89,6 +89,7 @@ public class Chunk : MonoBehaviour
     }
 
     // This function determines what sides should be shown. (side data)
+    // top, under, left, right, front, back.
     private void BakeData () 
     {
         for(int y = 0; y < Y_SIZE; y++) {
@@ -116,7 +117,7 @@ public class Chunk : MonoBehaviour
                         else
                             l = (_data[y, x - 1, z] == (byte) Block.Air) ? true : false;
 
-                        if(x + 1 > X_SIZE)
+                        if(x + 1 >= X_SIZE)
                             r = true;
                         else
                             r = (_data[y, x + 1, z] == (byte) Block.Air) ? true : false;
@@ -126,15 +127,15 @@ public class Chunk : MonoBehaviour
                         else
                             f = (_data[y, x, z - 1] == (byte) Block.Air) ? true : false;
 
-                        if(z + 1 > Z_SIZE)
+                        if(z + 1 >= Z_SIZE)
                             b = true;
                         else
                             b = (_data[y, x, z + 1] == (byte) Block.Air) ? true : false;
 
                         // TODO: find better way to do this
                         Func<bool, byte> btb = bo => (bo == true) ? (byte) 1 : (byte) 0;
-                        _sideData[y, x, z] = (byte) ((byte) 128 * btb(t) + (byte) 64 * btb(u) + (byte) 32 * btb(l) + 
-                                                     (byte) 16 * btb(r) + (byte) 8 * btb(f) + (byte) 4 * btb(b));
+                        _sideData[y, x, z] = (byte) ((byte) 32 * btb(t) + (byte) 16 * btb(u) + (byte) 8 * btb(l) + 
+                                                     (byte) 4 * btb(r) + (byte) 2 * btb(f) + (byte) 1 * btb(b));
                     } 
                     // done with one block
 
@@ -143,9 +144,169 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    // This function creates the mesh for one layer (deletes old mesh? --> counts as refresh?)
-    private void CreateMeshLayer(int i) {
+    // TODO: make O(1) time
+    private int CountSidesInLayer(int layer) {
+        int counter = 0;
+        for(int y = 0; y < SUB_CHUNK_Y_SIZE; y++) {
+            for(int x = 0; x < X_SIZE; x++) {
+                for(int z = 0; z < Z_SIZE; z++) {
+                    // TODO: find better way to do this.
+                    byte b = _sideData[y + layer*SUB_CHUNK_Y_SIZE, x, z];
+                    if((b & 1) / 1 == 1) counter++;
+                    if((b & 2) / 2 == 1) counter++;
+                    if((b & 4) / 4 == 1) counter++;
+                    if((b & 8) / 8 == 1) counter++;
+                    if((b & 16) / 16 == 1) counter++;
+                    if((b & 32) / 32 == 1) counter++;
+                }
+            }
+        }
+        return counter;
+    }
 
+    // This function adds the data from a tile to the corresponding mesh data parts
+    // position increases by the number of sides added.
+    private void AddCubeMesh( int x, int y, int z, int layer, ref int position, Vector3[] verts, int[] tris) {
+        byte b = _sideData[y + layer*SUB_CHUNK_Y_SIZE, x, z]; // TODO: find better way to do this?
+        
+        // back
+        if((b & 1) / 1 == 1) {
+            verts[position*4 + 0] = new Vector3(0 + x, 0 + y, 1 + z);
+            verts[position*4 + 1] = new Vector3(1 + x, 0 + y, 1 + z);
+            verts[position*4 + 2] = new Vector3(0 + x, 1 + y, 1 + z);
+            verts[position*4 + 3] = new Vector3(1 + x, 1 + y, 1 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        } 
+
+        // front
+        if((b & 2) / 2 == 1) {
+            verts[position*4 + 0] = new Vector3(0 + x, 0 + y, 0 + z);
+            verts[position*4 + 1] = new Vector3(1 + x, 0 + y, 0 + z);
+            verts[position*4 + 2] = new Vector3(0 + x, 1 + y, 0 + z);
+            verts[position*4 + 3] = new Vector3(1 + x, 1 + y, 0 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        }
+
+        // right
+        if((b & 4) / 4 == 1) {
+            verts[position*4 + 0] = new Vector3(1 + x, 0 + y, 1 + z);
+            verts[position*4 + 1] = new Vector3(1 + x, 0 + y, 0 + z);
+            verts[position*4 + 2] = new Vector3(1 + x, 1 + y, 1 + z);
+            verts[position*4 + 3] = new Vector3(1 + x, 1 + y, 0 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        }
+
+        // left
+        if((b & 8) / 8 == 1) {
+            verts[position*4 + 0] = new Vector3(0 + x, 0 + y, 1 + z);
+            verts[position*4 + 1] = new Vector3(0 + x, 0 + y, 0 + z);
+            verts[position*4 + 2] = new Vector3(0 + x, 1 + y, 1 + z);
+            verts[position*4 + 3] = new Vector3(0 + x, 1 + y, 0 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        }
+
+        // under
+        if((b & 16) / 16 == 1) {
+            verts[position*4 + 0] = new Vector3(0 + x, 0 + y, 0 + z);
+            verts[position*4 + 1] = new Vector3(1 + x, 0 + y, 0 + z);
+            verts[position*4 + 2] = new Vector3(0 + x, 0 + y, 1 + z);
+            verts[position*4 + 3] = new Vector3(1 + x, 0 + y, 1 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        }
+
+        // top
+        if((b & 32) / 32 == 1) {
+            verts[position*4 + 0] = new Vector3(0 + x, 1 + y, 0 + z);
+            verts[position*4 + 1] = new Vector3(1 + x, 1 + y, 0 + z);
+            verts[position*4 + 2] = new Vector3(0 + x, 1 + y, 1 + z);
+            verts[position*4 + 3] = new Vector3(1 + x, 1 + y, 1 + z);
+
+            tris[position*6 + 0] = position*4 + 0;
+            tris[position*6 + 1] = position*4 + 2; 
+            tris[position*6 + 2] = position*4 + 1; 
+            tris[position*6 + 3] = position*4 + 2;
+            tris[position*6 + 4] = position*4 + 3; 
+            tris[position*6 + 5] = position*4 + 1; 
+
+            position++;
+        }
+
+        // TODO: double check that all sides actually show.
+
+    }
+
+    // This function creates the mesh for one layer using the baked side data 
+    // This actually resets the mesh.
+    private void RefreshMeshLayer(int layer) 
+    {
+        // calculate sizes
+        int sides = CountSidesInLayer(layer);
+
+        // create variables.
+        Vector3[] verts = new Vector3[sides * 4];
+        //Vector3[] normals = new Vector3[sides * 4];  // need normals later
+        int[] tris = new int[sides * 3 * 2];
+        
+        // fill variables.
+        int position = 0;
+        for(int y = 0; y < SUB_CHUNK_Y_SIZE; y++) {
+            for(int x = 0; x < X_SIZE; x++) {
+                for(int z = 0; z < Z_SIZE; z++) {
+
+                    // If this does not fire, it means there is no cube data at the position.
+                    if(_sideData[y + layer*SUB_CHUNK_Y_SIZE, x, z] != (byte) 0) {
+                        AddCubeMesh(x, y, z, layer, ref position, verts, tris);
+                    }
+
+                }
+            }
+        }
+
+        // assign to mesh.
+        subChunks[layer] = new Mesh();  // is this slow?
+        subChunks[layer].vertices = verts;
+        subChunks[layer].triangles = tris;
+        //subChunks[layer].normals = normals;
     }
 
     // TODO: just change the array of triangles and stuff so that it's okay.
@@ -170,7 +331,7 @@ public class Chunk : MonoBehaviour
 
             // counting how many blocks to combine
             int size = 0;
-            for(int y = 0; y < Y_SIZE / SUB_CHUNKS; y++)
+            for(int y = 0; y < SUB_CHUNK_Y_SIZE; y++)
                 for(int x = 0; x < X_SIZE; x++)
                     for(int z = 0; z < Z_SIZE; z++)
                         if (_data[y + i*SUB_CHUNK_Y_SIZE, x, z] == (byte) Block.Dirt)
@@ -181,7 +342,7 @@ public class Chunk : MonoBehaviour
                             
             // iterate through the local space of a single chunk.
             int oi = 0;  // object index
-            for(int y = 0; y < Y_SIZE / SUB_CHUNKS; y++) {
+            for(int y = 0; y < SUB_CHUNK_Y_SIZE; y++) {
                 for(int x = 0; x < X_SIZE; x++) {
                     for(int z = 0; z < Z_SIZE; z++) {
                         if (_data[y + i*SUB_CHUNK_Y_SIZE, x, z] == (byte) Block.Dirt) {
@@ -221,13 +382,12 @@ public class Chunk : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //_blocks.Draw(_data, transform.position);  // better?
         DrawLayers();
     }
     
 
     // Draws the loaded mesh layers.
-    // todo: consider stepped chunk loading to be nice to gpu.
+    // todo: consider stepped chunk loading to be nice to cpu.
     public void DrawLayers() 
     {
         for(int y = 0; y < SUB_CHUNKS; y++) {
